@@ -1,4 +1,4 @@
 import dataHandling as dh
-import KNearestNeighbours
+import kNearestNeighbours
 
-KNearestNeighbours.KNN("DB",1)
+kNearestNeighbours.KNN("DB",1)

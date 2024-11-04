@@ -20,5 +20,6 @@ def NCC(database):
         prediction.append(np.argmin(distances))  # Class/category of the nearest centroid.
 
     # Accuracy calculation.
-    accuracy = accuracy_score(input_labels, test_labels)
+    accuracy = accuracy_score(prediction, test_labels)
     print(f"Accuracy with Nearest Class Centroids: {accuracy * 100:.2f}%")
+    return accuracy
