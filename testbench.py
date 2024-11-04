@@ -1,4 +1,4 @@
 import data_handling as dh
+import knn
 
-result=dh.unpickle("DB/data_batch_1")
-print(dh.load_data("DB"))
+knn.KNN("DB")
