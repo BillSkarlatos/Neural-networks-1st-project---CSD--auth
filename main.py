@@ -9,10 +9,13 @@ def compare(NCC_acc, KNN_acc):
     else:
         print(f"Both methods had equal accuracies with: {NCC_acc * 100:.2f}%")
 
-centroid=ncc.NCC("DB")
-knn1=knn.KNN("DB",1)
-knn3=knn.KNN("DB",3)
-print("\nFor 1st nearest neighbour:")
-compare(centroid,knn1)
-print("For the 3 nearest neighbours:")
-compare(centroid,knn3)
+def main():
+    centroid=ncc.NCC("DB")
+    knn1=knn.KNN("DB",1)
+    knn3=knn.KNN("DB",3)
+    print("\nFor 1st nearest neighbour:")
+    compare(centroid,knn1)
+    print("For the 3 nearest neighbours:")
+    compare(centroid,knn3)
+
+main()
