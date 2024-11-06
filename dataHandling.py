@@ -13,11 +13,7 @@ def unpickle(file):
 def load_data(data_dir, limit):
     # Axis array initialisation.
     x_train = []
-    y_train = []
-    
-    # If limit is 0, it will be interpreted as false and not limit the dataset,
-    # if limit id higher than 0, it will limit the dataset acccordingly.
-    
+    y_train = []    
 
     # CIFAR-10 has 5 training batches and 1 test batch
     for i in range(1, 6):
@@ -33,6 +29,8 @@ def load_data(data_dir, limit):
     x_test = test_dict['data']
     y_test = np.array(test_dict['labels'])
 
+    # If limit is 0, it will be interpreted as false and not limit the dataset,
+    # if limit id higher than 0, it will limit the dataset acccordingly.
     if limit>0:
         olen=len(x_train)
         x_train, y_train, x_test, y_test = limit_dataset(limit, x_train, y_train, x_test, y_test)
