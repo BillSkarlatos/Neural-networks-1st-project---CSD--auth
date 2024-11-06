@@ -21,13 +21,13 @@ def load_data(data_dir, limit):
         x_train.append(data_dict['data'])
         y_train += data_dict['labels']
     
-    x_train = np.concatenate(x_train)
-    y_train = np.array(y_train)
+    x_train = np.concatenate(x_train) # Training data
+    y_train = np.array(y_train) # Training labels
     
     # Load test batch
     test_dict = unpickle(os.path.join(data_dir, 'test_batch'))
-    x_test = test_dict['data']
-    y_test = np.array(test_dict['labels'])
+    x_test = test_dict['data'] # Testing data
+    y_test = np.array(test_dict['labels']) # Testing labels
 
     # If limit is 0, it will be interpreted as false and not limit the dataset,
     # if limit id higher than 0, it will limit the dataset acccordingly.
