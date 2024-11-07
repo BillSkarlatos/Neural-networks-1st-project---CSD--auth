@@ -15,5 +15,5 @@ def KNN(database, num):
 
     prediction = knn.predict(test_data)
     accuracy = accuracy_score(test_labels, prediction)
-    print(f"Accuracy with KNN with k={num}: {accuracy * 100:.2f}%")
+    print(f"Accuracy with K-Nearest Neighbours with k={num}: {accuracy * 100:.2f}%")
     return accuracy
