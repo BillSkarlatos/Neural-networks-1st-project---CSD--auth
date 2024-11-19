@@ -1,6 +1,8 @@
 import pickle
 import os
 import numpy as np
+import torch
+from torch.utils.data import Dataset, DataLoader
 
 # As mentioned in readme.html, each of these files is a Python "pickled" object produced with cPickle,
 # so, we "unpickle" them accodringly.
@@ -44,3 +46,41 @@ def limit_dataset(num, x_train, y_train, x_test, y_test):
     x_train, y_train = x_train[:num], y_train[:num]  
     x_test, y_test = x_test[:num//5], y_test[:num//5]
     return x_train, y_train, x_test, y_test
+
+def reshape(x_train, x_test):
+    # Reshape data to [num_samples, channels, height, width]
+    x_train = x_train.reshape(-1, 3, 32, 32).astype('float32')  # [50000, 3, 32, 32]
+    x_test = x_test.reshape(-1, 3, 32, 32).astype('float32')    # [10000, 3, 32, 32]
+
+    # Normalize data to range [-1, 1]
+    x_train = (x_train / 255.0) * 2 - 1
+    x_test = (x_test / 255.0) * 2 - 1
+    return x_train, x_test
+
+class CIFAR10Dataset(Dataset):
+    def __init__(self, data, labels):
+        self.data = data
+        self.labels = labels
+
+    def __len__(self):
+        return len(self.labels)
+
+    def __getitem__(self, idx):
+        # Reshape the image from [3072] to [3, 32, 32] and normalize it
+        image = self.data[idx].reshape(3, 32, 32).astype('float32') / 255.0
+        label = self.labels[idx]
+        return torch.tensor(image, dtype=torch.float32), torch.tensor(label, dtype=torch.long)
+
+
+    
+def data_loader():
+    x_train, y_train, x_test, y_test = load_data("DB",0)
+
+    # Create PyTorch datasets
+    train_dataset = CIFAR10Dataset(x_train, y_train)
+    test_dataset = CIFAR10Dataset(x_test, y_test)
+
+    # Create DataLoaders
+    train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
+    test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
+    return train_loader, test_loader
