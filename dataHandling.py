@@ -3,6 +3,7 @@ import os
 import numpy as np
 import torch
 from torch.utils.data import Dataset, DataLoader
+from torchvision import transforms
 
 # As mentioned in readme.html, each of these files is a Python "pickled" object produced with cPickle,
 # so, we "unpickle" them accodringly.
@@ -66,21 +67,39 @@ class CIFAR10Dataset(Dataset):
         return len(self.labels)
 
     def __getitem__(self, idx):
-        # Reshape the image from [3072] to [3, 32, 32] and normalize it
+        # Reshape the image from [3072] to [3, 32, 32]
         image = self.data[idx].reshape(3, 32, 32).astype('float32') / 255.0
         label = self.labels[idx]
-        return torch.tensor(image, dtype=torch.float32), torch.tensor(label, dtype=torch.long)
+        image = torch.tensor(image, dtype=torch.float32)
+
+        if self.transform:
+            image = self.transform(image)
+
+        return image, torch.tensor(label, dtype=torch.long)
+
 
 
     
-def data_loader():
+def data_loader(batch):
     x_train, y_train, x_test, y_test = load_data("DB",0)
 
+    train_transform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.RandomHorizontalFlip(),  # Τυχαίος καθρεπτισμός
+        transforms.RandomRotation(10),     # Τυχαία περιστροφή ±10 μοίρες
+        transforms.Normalize((0.5,), (0.5,))  # Κανονικοποίηση
+    ])
+
+    test_transform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize((0.5,), (0.5,))  # Κανονικοποίηση χωρίς augmentation
+    ])
+
     # Create PyTorch datasets
-    train_dataset = CIFAR10Dataset(x_train, y_train)
-    test_dataset = CIFAR10Dataset(x_test, y_test)
+    train_dataset = CIFAR10Dataset(x_train, y_train, transform=train_transform)
+    test_dataset = CIFAR10Dataset(x_test, y_test, transform=test_transform)
 
     # Create DataLoaders
-    train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
-    test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
+    train_loader = DataLoader(train_dataset, batch_size=batch, shuffle=True)
+    test_loader = DataLoader(test_dataset, batch_size=batch, shuffle=False)
     return train_loader, test_loader
