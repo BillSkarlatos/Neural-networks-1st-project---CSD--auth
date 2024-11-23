@@ -7,37 +7,37 @@ import time
 
 
 # Define a simple CNN
-class CNN(nn.Module):
+class CNN(nn.Module):   # We will test it for at least 2 combination of neurons. Look in the next comments for the low and high proposed values [ {low} - {high} Neurons/Filters]
     def __init__(self):
         super(CNN, self).__init__()
-        self.conv1 = nn.Conv2d(3, 32, 3, padding=1)
-        self.conv2 = nn.Conv2d(32, 64, 3, padding=1)
+        self.conv1 = nn.Conv2d(3, 64, 3, padding=1)  # 32 - 64 Filters
+        self.conv2 = nn.Conv2d(64, 128, 3, padding=1) # 64 - 128 Filters
         self.pool = nn.MaxPool2d(2, 2)
-        self.fc1 = nn.Linear(64 * 8 * 8, 128)
-        self.fc2 = nn.Linear(128, 10)
+        self.fc1 = nn.Linear(128 * 8 * 8, 256) # 128 - 256 Neurons
+        self.fc2 = nn.Linear(256, 10) # Output layer for the 10 categories.
         self.relu = nn.ReLU()
 
     def forward(self, x):
         x = self.pool(self.relu(self.conv1(x)))
         x = self.pool(self.relu(self.conv2(x)))
-        x = x.view(-1, 64 * 8 * 8)
+        x = x.view(-1, 128 * 8 * 8) 
         x = self.relu(self.fc1(x))
         x = self.fc2(x)
         return x
     
 def evaluate_model(model, test_loader):
-    model.eval()  # Θέστε το δίκτυο σε κατάσταση αξιολόγησης
+    model.eval()  # Sets the model to evaluation mode: disables normalisation and ensures stable function for testing.
     correct = 0
     total = 0
     
-    with torch.no_grad():  # Απενεργοποίηση gradients για ταχύτερη εκτέλεση
+    with torch.no_grad():  # Disable gradients for faster execution.
         for images, labels in test_loader:
-            outputs = model(images)  # Υπολογισμός εξόδων
-            _, predicted = torch.max(outputs, 1)  # Βρείτε την κατηγορία με τη μεγαλύτερη πιθανότητα
-            total += labels.size(0)  # Συνολικός αριθμός δειγμάτων
-            correct += (predicted == labels).sum().item()  # Μετρήστε τις σωστές προβλέψεις
+            outputs = model(images)
+            _, predicted = torch.max(outputs, 1)
+            total += labels.size(0)
+            correct += (predicted == labels).sum().item()
     
-    accuracy = 100 * correct / total  # Υπολογισμός ακρίβειας
+    accuracy = 100 * correct / total
     print(f"Test Accuracy: {accuracy:.2f}%")
     return accuracy
 
@@ -86,5 +86,5 @@ def startNetwork(epochs, batch_size, learning_rate):
     plt.grid()
     plt.show()
 
-startNetwork(30, 32, 0.0005)
+startNetwork(30, 64, 0.0008)
 

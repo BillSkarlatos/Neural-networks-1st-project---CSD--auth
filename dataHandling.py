@@ -64,7 +64,7 @@ class CIFAR10Dataset(Dataset):
         self.data = data
         self.labels = labels
         self.transform = transform  # Augmentation transforms
-        self.normalize = normalize  # Κανονικοποίηση (Normalize)
+        self.normalize = normalize 
 
     def __len__(self):
         return len(self.labels)
@@ -74,17 +74,16 @@ class CIFAR10Dataset(Dataset):
         image = self.data[idx].reshape(3, 32, 32).astype('float32')  # NumPy array
         label = self.labels[idx]
 
-        # Μετατροπή σε PIL Image για augmentation transforms
+        # Conversion to PIL image : Recommended by ChatGPT
         image = to_pil_image(torch.tensor(image))
 
-        # Εφαρμογή augmentation transforms αν υπάρχουν
+        # If the data is to be augmented, do the augmentation
         if self.transform:
             image = self.transform(image)
 
-        # Μετατροπή σε Tensor
         image = transforms.ToTensor()(image)
 
-        # Εφαρμογή κανονικοποίησης αν υπάρχει
+        # If the data is to be normalized, do it
         if self.normalize:
             image = self.normalize(image)
 
@@ -94,24 +93,20 @@ class CIFAR10Dataset(Dataset):
     
 def data_loader(batch):
     import torchvision.transforms as transforms
-
-    # Φόρτωση δεδομένων CIFAR-10
     x_train, y_train, x_test, y_test = load_data("DB", 0)
 
-    # Ορισμός μετασχηματισμών (Augmentation για training)
+    # Data augmentation via transform
     train_transform = transforms.Compose([
-        transforms.RandomHorizontalFlip(),  # Τυχαίος καθρεπτισμός
-        transforms.RandomRotation(10)      # Τυχαία περιστροφή ±10 μοίρες
+        transforms.RandomHorizontalFlip(),
+        transforms.RandomRotation(10) #+- 10 degrees of ratation
     ])
 
-    # Κανονικοποίηση (κοινή για training και test)
     normalize = transforms.Normalize((0.5,), (0.5,))
 
-    # Δημιουργία PyTorch datasets
     train_dataset = CIFAR10Dataset(x_train, y_train, transform=train_transform, normalize=normalize)
-    test_dataset = CIFAR10Dataset(x_test, y_test, normalize=normalize)  # Χωρίς augmentation
+    test_dataset = CIFAR10Dataset(x_test, y_test, normalize=normalize)  # No augmentation for test set
 
-    # Δημιουργία DataLoaders
+    # DataLoaders
     train_loader = DataLoader(train_dataset, batch_size=batch, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=batch, shuffle=False)
     return train_loader, test_loader
