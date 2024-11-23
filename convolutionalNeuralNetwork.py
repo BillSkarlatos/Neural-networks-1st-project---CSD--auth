@@ -5,6 +5,7 @@ import dataHandling as dh
 import matplotlib.pyplot as plt
 import time
 
+
 # Define a simple CNN
 class CNN(nn.Module):
     def __init__(self):

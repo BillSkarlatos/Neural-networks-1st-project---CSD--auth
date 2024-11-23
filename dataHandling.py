@@ -4,6 +4,7 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
+from torchvision.transforms.functional import to_pil_image
 
 # As mentioned in readme.html, each of these files is a Python "pickled" object produced with cPickle,
 # so, we "unpickle" them accodringly.
@@ -59,47 +60,59 @@ def reshape(x_train, x_test):
     return x_train, x_test
 
 class CIFAR10Dataset(Dataset):
-    def __init__(self, data, labels):
+    def __init__(self, data, labels, transform=None, normalize=None):
         self.data = data
         self.labels = labels
+        self.transform = transform  # Augmentation transforms
+        self.normalize = normalize  # Κανονικοποίηση (Normalize)
 
     def __len__(self):
         return len(self.labels)
 
     def __getitem__(self, idx):
         # Reshape the image from [3072] to [3, 32, 32]
-        image = self.data[idx].reshape(3, 32, 32).astype('float32') / 255.0
+        image = self.data[idx].reshape(3, 32, 32).astype('float32')  # NumPy array
         label = self.labels[idx]
-        image = torch.tensor(image, dtype=torch.float32)
 
+        # Μετατροπή σε PIL Image για augmentation transforms
+        image = to_pil_image(torch.tensor(image))
+
+        # Εφαρμογή augmentation transforms αν υπάρχουν
         if self.transform:
             image = self.transform(image)
+
+        # Μετατροπή σε Tensor
+        image = transforms.ToTensor()(image)
+
+        # Εφαρμογή κανονικοποίησης αν υπάρχει
+        if self.normalize:
+            image = self.normalize(image)
 
         return image, torch.tensor(label, dtype=torch.long)
 
 
-
     
 def data_loader(batch):
-    x_train, y_train, x_test, y_test = load_data("DB",0)
+    import torchvision.transforms as transforms
 
+    # Φόρτωση δεδομένων CIFAR-10
+    x_train, y_train, x_test, y_test = load_data("DB", 0)
+
+    # Ορισμός μετασχηματισμών (Augmentation για training)
     train_transform = transforms.Compose([
-        transforms.ToTensor(),
         transforms.RandomHorizontalFlip(),  # Τυχαίος καθρεπτισμός
-        transforms.RandomRotation(10),     # Τυχαία περιστροφή ±10 μοίρες
-        transforms.Normalize((0.5,), (0.5,))  # Κανονικοποίηση
+        transforms.RandomRotation(10)      # Τυχαία περιστροφή ±10 μοίρες
     ])
 
-    test_transform = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Normalize((0.5,), (0.5,))  # Κανονικοποίηση χωρίς augmentation
-    ])
+    # Κανονικοποίηση (κοινή για training και test)
+    normalize = transforms.Normalize((0.5,), (0.5,))
 
-    # Create PyTorch datasets
-    train_dataset = CIFAR10Dataset(x_train, y_train, transform=train_transform)
-    test_dataset = CIFAR10Dataset(x_test, y_test, transform=test_transform)
+    # Δημιουργία PyTorch datasets
+    train_dataset = CIFAR10Dataset(x_train, y_train, transform=train_transform, normalize=normalize)
+    test_dataset = CIFAR10Dataset(x_test, y_test, normalize=normalize)  # Χωρίς augmentation
 
-    # Create DataLoaders
+    # Δημιουργία DataLoaders
     train_loader = DataLoader(train_dataset, batch_size=batch, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=batch, shuffle=False)
     return train_loader, test_loader
+
