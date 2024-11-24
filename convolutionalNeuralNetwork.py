@@ -4,6 +4,7 @@ import torch.optim as optim
 import dataHandling as dh
 import matplotlib.pyplot as plt
 import time
+import numpy as np
 
 
 # Define a simple CNN
@@ -73,7 +74,7 @@ def startNetwork(epochs, batch_size, learning_rate):
     minutes= total_time//60
     seconds= total_time - minutes*60
     print("Training complete.")
-    print(f"Total training time: {minutes} minutes, {seconds:.2f} seconds.")
+    print(f"Total training time: {int(minutes)} minutes, {seconds:.2f} seconds.")
     print("Evaluating model...")
     acc=evaluate_model(model,test_loader)
 
@@ -85,6 +86,48 @@ def startNetwork(epochs, batch_size, learning_rate):
     plt.legend()
     plt.grid()
     plt.show()
+    
+    #examples(model, test_loader) # 5 Specific Examples, uncomment to check or check the project report
 
-startNetwork(30, 64, 0.0008)
+def imshow(img, title):
+    img = img / 2 + 0.5  # Unnormalize
+    npimg = img.numpy()
+    plt.imshow(np.transpose(npimg, (1, 2, 0)))
+    plt.title(title)
+    plt.axis('off')
+
+def examples(model,test_loader):
+    model.eval()
+    examples = []
+
+    with torch.no_grad():
+        for images, labels in test_loader:
+            outputs = model(images)
+            _, predicted = torch.max(outputs, 1)
+            for i in range(len(labels)):
+                if predicted[i] == labels[i]:
+                    examples.append(('correct', images[i], labels[i], predicted[i]))
+                else:
+                    examples.append(('incorrect', images[i], labels[i], predicted[i]))
+
+    correct_examples = [ex for ex in examples if ex[0] == 'correct'][:5]
+    incorrect_examples = [ex for ex in examples if ex[0] == 'incorrect'][:5]
+
+    # Showing the results : Recommended by Chat GPT
+
+    # Correct
+    plt.figure(figsize=(10, 5))
+    for i, (status, image, label, predicted) in enumerate(correct_examples):
+        plt.subplot(1, 5, i + 1)
+        imshow(image, f"Label: {label}, Pred: {predicted}")
+    plt.suptitle("Correct Predictions")
+    plt.show()
+
+    # Incorrect
+    plt.figure(figsize=(10, 5))
+    for i, (status, image, label, predicted) in enumerate(incorrect_examples):
+        plt.subplot(1, 5, i + 1)
+        imshow(image, f"Label: {label}, Pred: {predicted}")
+    plt.suptitle("Incorrect Predictions")
+    plt.show()
 

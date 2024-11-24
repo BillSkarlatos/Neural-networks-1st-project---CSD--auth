@@ -1,7 +1,7 @@
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score
-import numpy as np
 import dataHandling as dh
+import time
 
 # K Nearest Neighbours
 def KNN(database, num):
@@ -10,10 +10,14 @@ def KNN(database, num):
     input_data, input_labels, test_data, test_labels = dh.load_data(database, 0)
 
     # K nearest neighbours class that takes the desired number of neighbours as an argument.
+    start_time=time.time()
     knn = KNeighborsClassifier(num)
     knn.fit(input_data, input_labels)
-
+    total_time=time.time() - start_time
+    minutes= total_time//60
+    seconds= total_time - minutes*60
     prediction = knn.predict(test_data)
     accuracy = accuracy_score(test_labels, prediction)
+    print(f"Classification complete in {int(minutes)} minutes, {seconds:.10f} seconds")
     print(f"Accuracy with K-Nearest Neighbours with k={num}: {accuracy * 100:.2f}%")
     return accuracy

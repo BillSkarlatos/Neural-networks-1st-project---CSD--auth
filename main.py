@@ -1,5 +1,6 @@
 import kNearestNeighbours as knn
 import nearestClassCentroid as ncc
+import convolutionalNeuralNetwork as cnn
 
 # Simple function to compare the results of the algorithms and display them accordingly as well as the exact percentage difference.
 def compare(NCC_acc, KNN_acc):
@@ -19,5 +20,6 @@ def main():
     compare(centroid,knn1)
     print("For the 3 nearest neighbours:")
     compare(centroid,knn3)
+    cnn.startNetwork(35, 64, 0.0008)
 
 main()
